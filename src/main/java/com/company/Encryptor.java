@@ -5,103 +5,60 @@ import java.io.*;
 public class Encryptor {
     public static void main(String[] args) {
 
-//        String input = "/home/anna/IdeaProjects/crypto/src/main/resources/007.png";
-//        String encrypted = "/home/anna/IdeaProjects/crypto/src/main/resources/007_encoded.png";
-//        String decrypted = "/home/anna/IdeaProjects/crypto/src/main/resources/007_decoded.png";
-
-//        String input = "/home/anna/IdeaProjects/crypto/src/main/resources/1.txt";
-        String input = "/home/anna/Downloads/m.mkv";
-//        String encrypted = "/home/anna/IdeaProjects/crypto/src/main/resources/1.encrypted.txt";
-        String encrypted = "/home/anna/Downloads/m-enc.mkv";
-//        String decrypted = "/home/anna/IdeaProjects/crypto/src/main/resources/1.decrypted.txt";
-        String decrypted = "/home/anna/Downloads/m-dec.mkv";
+        String input = "/home/anna/IdeaProjects/crypto/src/main/resources/1.txt";
+        String encrypted = "/home/anna/IdeaProjects/crypto/src/main/resources/1.encrypted.txt";
+        String decrypted = "/home/anna/IdeaProjects/crypto/src/main/resources/1.decrypted.txt";
 
         String key = "abcdef";
 
-        encrypt(input, encrypted, key, 1024 * 1024 * 100);
-        decrypt(encrypted, decrypted, key, 1024 * 1024 * 100);
+//        (true, encrypted, key, 5);
+//        (false, decrypted, key, 5);
+
+        encrypt1_decrypt0(false, encrypted, decrypted, key, 1);
     }
 
-    static void encrypt(String inputPathname, String outputPathname, String key, int bufSize) {
-        File sourceFile = new File(inputPathname);
-        byte[] source = new byte[bufSize];
-        byte[] buf = new byte[bufSize];
-
+    static void encrypt1_decrypt0(boolean encrypt, String inputPathname, String outputPathname, String key, int bufSize) {
         try {
+            File sourceFile = new File(inputPathname);
             FileInputStream fileInputStream = new FileInputStream(sourceFile);
-            File encodedFile = new File(outputPathname);
-            boolean creating = encodedFile.createNewFile();
-            FileOutputStream fileOutputStream = new FileOutputStream(encodedFile);
+            File resultFile = new File(outputPathname);
+            FileOutputStream fileOutputStream = new FileOutputStream(resultFile);
 
-            long inputFileLength = sourceFile.length();
+            byte[] buf;
+            if (sourceFile.length() > bufSize) {
+                buf = new byte[bufSize];
+            } else {
+                buf = new byte[(int) sourceFile.length()];
+            }
+
             int percentsFinished = -1;
             int step = 0;
             int keyPos = 0;
+            long inputFileLength = sourceFile.length();
+
             while (fileInputStream.available() > 0) {
-                int read = fileInputStream.read(source, 0, bufSize);
+                int read = fileInputStream.read(buf, 0, buf.length);
                 for (int i = 0; i < read; i++) {
-                    buf[i] = ((byte) (source[i] + key.charAt(keyPos)));
+                    if (encrypt) {
+                        buf[i] = ((byte) (buf[i] + key.charAt(keyPos)));
+                    } else {
+                        buf[i] = (byte) (buf[i] - key.charAt(keyPos));
+                    }
                     keyPos = (keyPos + 1) % key.length();
                 }
                 step++;
                 fileOutputStream.write(buf);
-                int currentPercents = (int) ((long)bufSize * (long)step * 100 / inputFileLength);
+                int currentPercents = (int) ((long) buf.length * (long) step * 100 / inputFileLength);
                 if (currentPercents != percentsFinished) {
                     percentsFinished = currentPercents;
                     System.out.println(percentsFinished + "%");
                 }
             }
             fileOutputStream.close();
-            System.out.println("finish");
 
-        } catch (FileNotFoundException e) {
-            System.out.println("File Not Found.");
-            e.printStackTrace();
-        } catch (IOException e1) {
-            System.out.println("Error Reading The File.");
-            e1.printStackTrace();
+        } catch (IOException fileNotFoundException) {
+            fileNotFoundException.printStackTrace();
         }
-    }
-
-
-    static void decrypt(String inputPathname, String outputPathname, String key, int bufSize) {
-        File file = new File(inputPathname);
-
-        byte[] source = new byte[bufSize];
-        byte[] buf = new byte[bufSize];
-
-        try {
-            FileInputStream fileInputStream = new FileInputStream(file);
-            File decodedFile = new File(outputPathname);
-            boolean creating = decodedFile.createNewFile();
-            FileOutputStream fileOutputStream = new FileOutputStream(decodedFile);
-
-            long inputFileLength = file.length();
-            int percentsFinished = -1;
-            int step = 0;
-            int keyPos = 0;
-            while (fileInputStream.available() > 0) {
-                int read = fileInputStream.read(source, 0, bufSize);
-                for (int i = 0; i < read; i++) {
-                    buf[i] = (byte) (source[i] - key.charAt(keyPos));
-                    keyPos = (keyPos + 1) % key.length();
-                }
-                step++;
-                fileOutputStream.write(buf);
-                int currentPercents = (int) ((long)bufSize * (long)step * 100 / inputFileLength);
-                if (currentPercents != percentsFinished) {
-                    percentsFinished = currentPercents;
-                    System.out.println(percentsFinished + "%");
-                }
-            }
-
-        } catch (FileNotFoundException e) {
-            System.out.println("File Not Found.");
-            e.printStackTrace();
-        } catch (IOException e1) {
-            System.out.println("Error Reading The File.");
-            e1.printStackTrace();
-        }
+        System.out.println("finish");
     }
 }
-
