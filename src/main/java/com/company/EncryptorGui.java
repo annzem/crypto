@@ -15,7 +15,6 @@ public class EncryptorGui {
     }
 
     private JFrame f;
-
     private String input;
     private String key;
     private String output;
@@ -81,12 +80,18 @@ public class EncryptorGui {
         }
         JFileChooser fileChooser = new JFileChooser();
         int result;
+        JTextArea textArea = new JTextArea();
+        f.getContentPane().removeAll();
+        f.revalidate();
+        f.repaint();
+
 
         if (fileType == FileType.INPUT) {
             fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
             result = fileChooser.showOpenDialog(f);
             if (result == JFileChooser.APPROVE_OPTION) {
                 input = fileChooser.getSelectedFile().getPath();
+                textArea.setText(pathText + fileChooser.getSelectedFile().getPath());
             }
         }
 
@@ -95,47 +100,48 @@ public class EncryptorGui {
             result = fileChooser.showSaveDialog(f);
             if (result == JFileChooser.APPROVE_OPTION) {
                 output = fileChooser.getSelectedFile().getPath();
+                textArea.setText(pathText + fileChooser.getSelectedFile().getPath());
             }
         }
 
-            f.getContentPane().removeAll();
-            f.revalidate();
-            f.repaint();
 
-            JTextArea textArea = new JTextArea(pathText + fileChooser.getSelectedFile().getPath());
-            textArea.setBounds(100, 100, 400, 30);
-            textArea.setBackground(null);
-            f.add(textArea);
+        textArea.setBounds(100, 100, 400, 30);
+        textArea.setBackground(null);
+        f.add(textArea);
 
-            JButton bBack = new JButton(button);
-            bBack.setBounds(100, 150, 200, 30);
-            f.add(bBack);
-            bBack.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if (fileType == FileType.INPUT) {
-                        drawChooseFileScreen(FileType.INPUT, input, "INPUT PATH: ", "choose another file");
-                    } else {
-                        drawChooseFileScreen(FileType.OUTPUT, output, "OUTPUT PATH: ", "choose another location");
-                    }
+        JButton bBack = new JButton(button);
+        bBack.setBounds(100, 150, 200, 30);
+        f.add(bBack);
+        bBack.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (fileType == FileType.INPUT) {
+                    drawChooseFileScreen(FileType.INPUT, input, "INPUT PATH: ", "choose another file");
+                } else {
+                    drawChooseFileScreen(FileType.OUTPUT, output, "OUTPUT PATH: ", "choose another location");
                 }
-            });
+            }
+        });
 
-            JButton bContinue = new JButton("continue");
-            bContinue.setBounds(350, 150, 100, 30);
-            f.add(bContinue);
-            bContinue.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if (fileType == FileType.INPUT) {
-                        drawSetKeyScreen();
-                    } else {
-                        drawEncryptingScreen();
-                    }
+        JButton bContinue = new JButton("continue");
+        bContinue.setBounds(350, 150, 100, 30);
+        f.add(bContinue);
+        bContinue.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (fileType == FileType.INPUT) {
+                    drawSetKeyScreen();
+                } else {
+                    JTextArea textAreaStartPerc = new JTextArea("0%");
+                    textAreaStartPerc.setBounds(250, 250, 300, 30);
+                    textAreaStartPerc.setBackground(null);
+                    f.add(textAreaStartPerc);
+                    drawEncryptingScreen();
                 }
-            });
-            f.revalidate();
-            f.repaint();
+            }
+        });
+        f.revalidate();
+        f.repaint();
 
     }
 
@@ -186,5 +192,48 @@ public class EncryptorGui {
         textArea.setBounds(250, 150, 300, 30);
         textArea.setBackground(null);
         f.add(textArea);
+
+        JTextArea textAreaPercents = new JTextArea("0 % finished");
+        textAreaPercents.setBounds(250, 200, 300, 30);
+        textAreaPercents.setBackground(null);
+        f.add(textAreaPercents);
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                EncryptorLogic.encrypt(true, input, output, key, 200*1024*1024, new EncryptorLogic.ProgressUpdateListener() {
+                    @Override
+                    public void progressUpdated(int percents) {
+                        textAreaPercents.setText(EncryptorLogic.percentsFinished + "% finished");
+
+                    }
+                });
+
+                f.getContentPane().removeAll();
+                f.revalidate();
+                f.repaint();
+                JTextArea textAreaFinish = new JTextArea("File was encrypted successfully!");
+                textAreaFinish.setBounds(150, 150, 300, 30);
+                textAreaFinish.setBackground(null);
+                f.add(textAreaFinish);
+
+                JButton toStartScreen = new JButton("encrypt something else");
+                toStartScreen.setBounds(170, 250, 250, 30);
+                f.add(toStartScreen);
+                toStartScreen.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        f.getContentPane().removeAll();
+                        f.revalidate();
+                        f.repaint();
+                        drawStartScreen();
+                    }
+                });
+                f.revalidate();
+                f.repaint();
+            }
+        });
+
+        thread.start();
     }
 }
