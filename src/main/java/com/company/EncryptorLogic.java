@@ -1,57 +1,70 @@
 package com.company;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class EncryptorLogic {
 
-    interface ProgressUpdateListener {
+    public interface ProgressUpdateListener {
         void progressUpdated(int percents);
     }
+
     static int percentsFinished = -1;
 
-    static void encrypt(boolean encrypt, String inputPathname, String outputPathname, String key, int bufSize, ProgressUpdateListener progressUpdateListener) {
-        try {
-            File sourceFile = new File(inputPathname);
-            FileInputStream fileInputStream = new FileInputStream(sourceFile);
-            File resultFile = new File(outputPathname);
-            FileOutputStream fileOutputStream = new FileOutputStream(resultFile);
+    public static void encrypt(boolean encrypt,
+                               InputStream fileInputStream,
+                               OutputStream fileOutputStream,
+                               long sourceFileLength,
+                               char[] key,
+                               int bufSize,
+                               ProgressUpdateListener progressUpdateListener) throws ReadException, WriteException {
 
-            byte[] buf;
-            if (sourceFile.length() > bufSize) {
-                buf = new byte[bufSize];
-            } else {
-                buf = new byte[(int) sourceFile.length()];
-            }
-            int step = 0;
-            int keyPos = 0;
-            long inputFileLength = sourceFile.length();
-
-            while (fileInputStream.available() > 0) {
-                int read = fileInputStream.read(buf, 0, buf.length);
-                for (int i = 0; i < read; i++) {
-                    if (encrypt) {
-                        buf[i] = ((byte) (buf[i] + key.charAt(keyPos)));
-                    } else {
-                        buf[i] = (byte) (buf[i] - key.charAt(keyPos));
-                    }
-                    keyPos = (keyPos + 1) % key.length();
-                }
-                step++;
-                fileOutputStream.write(buf);
-                int currentPercents = (int) ((long) buf.length * (long) step * 100 / inputFileLength);
-                if (currentPercents != percentsFinished) {
-                    percentsFinished = currentPercents;
-                    progressUpdateListener.progressUpdated(percentsFinished);
-                }
-            }
-            fileOutputStream.close();
-
-        } catch (IOException fileNotFoundException) {
-            fileNotFoundException.printStackTrace();
+        byte[] buf;
+        if (sourceFileLength > bufSize || sourceFileLength == 0) {
+            buf = new byte[bufSize];
+        } else {
+            buf = new byte[(int) sourceFileLength];
         }
-        System.out.println("finish");
+        int step = 0;
+        int keyPos = 0;
+        long inputFileLength = sourceFileLength;
+
+        while (true) {
+            int read = 0;
+            try {
+                if (!(fileInputStream.available() > 0)) break;
+                read = fileInputStream.read(buf, 0, buf.length);
+            } catch (IOException e) {
+                throw new ReadException("Can't read input", e);
+            }
+
+
+            for (int i = 0; i < read; i++) {
+                if (encrypt) {
+                    buf[i] = ((byte) (buf[i] + key[keyPos]));
+                } else {
+                    buf[i] = ((byte) (buf[i] - key[keyPos]));
+                }
+                keyPos = (keyPos + 1) % key.length;
+            }
+            step++;
+            try {
+                fileOutputStream.write(buf, 0, read);
+            } catch (IOException e) {
+                throw new WriteException("Can't write to output", e);
+            }
+
+            int currentPercents = (int) ((long) buf.length * (long) step * 100 / inputFileLength);
+            if (currentPercents != percentsFinished) {
+                percentsFinished = currentPercents;
+                progressUpdateListener.progressUpdated(percentsFinished);
+            }
+        }
+        try {
+            fileOutputStream.close();
+        } catch (IOException e) {
+            throw new WriteException("Can't close outputStream", e);
+        }
     }
 }
