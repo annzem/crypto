@@ -5,11 +5,9 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.*;
 import java.util.Map;
-import java.util.function.Consumer;
+
 
 public class EncryptorGui {
 
@@ -84,7 +82,7 @@ public class EncryptorGui {
         }
         JFileChooser fileChooser = new JFileChooser();
         int result;
-        JTextArea textArea = new JTextArea();
+        JLabel label = new JLabel();
         f.getContentPane().removeAll();
         f.revalidate();
         f.repaint();
@@ -95,7 +93,7 @@ public class EncryptorGui {
             result = fileChooser.showOpenDialog(f);
             if (result == JFileChooser.APPROVE_OPTION) {
                 input = fileChooser.getSelectedFile().getPath();
-                textArea.setText(pathText + fileChooser.getSelectedFile().getPath());
+                label.setText(pathText + fileChooser.getSelectedFile().getPath());
             }
         }
 
@@ -104,14 +102,14 @@ public class EncryptorGui {
             result = fileChooser.showSaveDialog(f);
             if (result == JFileChooser.APPROVE_OPTION) {
                 output = fileChooser.getSelectedFile().getPath();
-                textArea.setText(pathText + fileChooser.getSelectedFile().getPath());
+                label.setText(pathText + fileChooser.getSelectedFile().getPath());
             }
         }
 
 
-        textArea.setBounds(100, 100, 400, 30);
-        textArea.setBackground(null);
-        f.add(textArea);
+        label.setBounds(100, 100, 400, 30);
+        label.setBackground(null);
+        f.add(label);
 
         JButton bBack = new JButton(button);
         bBack.setBounds(100, 150, 200, 30);
@@ -156,51 +154,51 @@ public class EncryptorGui {
         JButton b = new JButton("submit");
         b.setBounds(350, 100, 80, 30);
 
-        JPasswordField t = new JPasswordField(20);
-        t.setEchoChar('*');
-        t.setBounds(100, 100, 200, 30);
+        JPasswordField passwordField = new JPasswordField(20);
+        passwordField.setEchoChar('*');
+        passwordField.setBounds(100, 100, 200, 30);
         Border border = BorderFactory.createLineBorder(Color.black, 1);
-        t.setBorder(border);
+        passwordField.setBorder(border);
 
-        JCheckBox d = new JCheckBox();
-        JTextArea d1 = new JTextArea("see key");
-        d1.setBackground(null);
-        d.setBounds(100, 150, 20, 20);
-        d1.setBounds(140, 150, 100, 30);
-        d.setBorderPaintedFlat(true);
+        JCheckBox checkBox = new JCheckBox();
+        JLabel labelKey = new JLabel("make visible/invisible");
+        labelKey.setBackground(null);
+        checkBox.setBounds(100, 150, 20, 20);
+        labelKey.setBounds(130, 150, 240, 20);
+        checkBox.setBorderPaintedFlat(true);
 
-        d.addActionListener(new ActionListener() {
+        checkBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JCheckBox d = (JCheckBox) e.getSource();
                 if (d.isSelected()) {
-                    t.setEchoChar((char) 0);
+                    passwordField.setEchoChar((char) 0);
                 } else {
-                    t.setEchoChar('*');
+                    passwordField.setEchoChar('*');
                 }
             }
         });
 
         f.add(l);
         f.add(b);
-        f.add(t);
-        f.add(d);
-        f.add(d1);
+        f.add(passwordField);
+        f.add(checkBox);
+        f.add(labelKey);
         f.revalidate();
         f.repaint();
 
         b.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (t.getPassword().length != 0) {
-                    key = t.getPassword();
+                if (passwordField.getPassword().length != 0) {
+                    key = passwordField.getPassword();
 
                     drawButtonChoose(FileType.OUTPUT, "choose where to save encrypted file");
                 } else {
-                    JTextArea textArea = new JTextArea("nothing entered!");
-                    textArea.setBounds(100, 130, 100, 30);
-                    textArea.setBackground(null);
-                    f.add(textArea);
+                    JLabel label = new JLabel("nothing entered!");
+                    label.setBounds(100, 130, 100, 30);
+                    label.setBackground(null);
+                    f.add(label);
                     f.revalidate();
                     f.repaint();
                 }
@@ -212,15 +210,15 @@ public class EncryptorGui {
         f.getContentPane().removeAll();
         f.revalidate();
         f.repaint();
-        JTextArea textArea = new JTextArea("encryption in process");
-        textArea.setBounds(250, 150, 300, 30);
-        textArea.setBackground(null);
-        f.add(textArea);
+        JLabel labelInProcess = new JLabel("encryption in process");
+        labelInProcess.setBounds(250, 150, 300, 30);
+        labelInProcess.setBackground(null);
+        f.add(labelInProcess);
 
-        JTextArea textAreaPercents = new JTextArea("0 % finished");
-        textAreaPercents.setBounds(250, 200, 500, 30);
-        textAreaPercents.setBackground(null);
-        f.add(textAreaPercents);
+        JLabel percentsLabel = new JLabel("0 % finished");
+        percentsLabel.setBounds(250, 200, 500, 30);
+        percentsLabel.setBackground(null);
+        f.add(percentsLabel);
 
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -233,16 +231,16 @@ public class EncryptorGui {
                     EncryptorLogic.encrypt(true, inputPair.getKey(), outputStream, inputPair.getValue(), key, 200 * 1024 * 1024, new EncryptorLogic.ProgressUpdateListener() {
                         @Override
                         public void progressUpdated(int percents) {
-                            textAreaPercents.setText(EncryptorLogic.percentsFinished + "% finished");
+                            percentsLabel.setText(EncryptorLogic.percentsFinished + "% finished");
                         }
                     });
                     f.getContentPane().removeAll();
                     f.revalidate();
                     f.repaint();
-                    JTextArea textAreaFinish = new JTextArea("File was encrypted successfully!");
-                    textAreaFinish.setBounds(150, 150, 300, 30);
-                    textAreaFinish.setBackground(null);
-                    f.add(textAreaFinish);
+                    JLabel labelFinish = new JLabel("File was encrypted successfully!");
+                    labelFinish.setBounds(150, 150, 300, 30);
+                    labelFinish.setBackground(null);
+                    f.add(labelFinish);
 
                     JButton toStartScreen = new JButton("encrypt something else");
                     toStartScreen.setBounds(170, 250, 250, 30);
@@ -259,7 +257,7 @@ public class EncryptorGui {
                     f.revalidate();
                     f.repaint();
                 } catch (FileNotFoundException | ReadException e) {
-                    textAreaPercents.setText(e.getMessage());
+                    percentsLabel.setText(e.getMessage());
                     JButton b = new JButton("choose another input file");
                     b.setBounds(150, 300, 300, 50);
                     f.add(b);
@@ -272,7 +270,7 @@ public class EncryptorGui {
                     f.revalidate();
                     f.repaint();
                 } catch (WriteException e) {
-                    textAreaPercents.setText(e.getMessage());
+                    percentsLabel.setText(e.getMessage());
                     JButton b = new JButton("choose another directory to save file");
                     b.setBounds(150, 300, 400, 50);
                     f.add(b);
