@@ -37,13 +37,14 @@ public class EncryptorGui {
     }
 
     void drawStartScreen() {
+        f.getContentPane().removeAll();
         JButton encryptButton = new JButton("encrypt file");
-        JButton decryptFile = new JButton("decrypt file");
+        JButton decryptButton = new JButton("decrypt file");
 
         encryptButton.setBounds(100, 100, 200, 50);
-        decryptFile.setBounds(400, 100, 200, 50);
+        decryptButton.setBounds(400, 100, 200, 50);
         f.add(encryptButton);
-        f.add(decryptFile);
+        f.add(decryptButton);
 
         encryptButton.addActionListener(new ActionListener() {
             @Override
@@ -52,6 +53,16 @@ public class EncryptorGui {
                 drawButtonChoose(FileType.INPUT, "choose file");
             }
         });
+
+        decryptButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                encrypt = false;
+                drawButtonChoose(FileType.INPUT, "choose file");
+            }
+        });
+        f.revalidate();
+        f.repaint();
     }
 
     void drawButtonChoose(FileType fileType, String button) {
@@ -80,13 +91,10 @@ public class EncryptorGui {
         if (fileType == null) {
             throw new RuntimeException("fileType is null");
         }
+        f.getContentPane().removeAll();
         JFileChooser fileChooser = new JFileChooser();
         int result;
         JLabel label = new JLabel();
-        f.getContentPane().removeAll();
-        f.revalidate();
-        f.repaint();
-
 
         if (fileType == FileType.INPUT) {
             fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
@@ -98,14 +106,16 @@ public class EncryptorGui {
         }
 
         if (fileType == FileType.OUTPUT) {
-            fileChooser.setSelectedFile(new File(input + ".enc"));
+            if (encrypt == true) {
+                fileChooser.setSelectedFile(new File(input + ".enc"));
+            } else { fileChooser.setSelectedFile(new File(input + ".dec"));
+            }
             result = fileChooser.showSaveDialog(f);
             if (result == JFileChooser.APPROVE_OPTION) {
                 output = fileChooser.getSelectedFile().getPath();
                 label.setText(pathText + fileChooser.getSelectedFile().getPath());
             }
         }
-
 
         label.setBounds(100, 100, 400, 30);
         label.setBackground(null);
@@ -128,6 +138,8 @@ public class EncryptorGui {
         JButton bContinue = new JButton("continue");
         bContinue.setBounds(350, 150, 100, 30);
         f.add(bContinue);
+        f.revalidate();
+        f.repaint();
         bContinue.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -138,15 +150,10 @@ public class EncryptorGui {
                 }
             }
         });
-        f.revalidate();
-        f.repaint();
-
     }
 
     void drawSetKeyScreen() {
         f.getContentPane().removeAll();
-        f.revalidate();
-        f.repaint();
 
         JLabel l = new JLabel("key:");
         l.setBounds(50, 100, 50, 30);
@@ -184,8 +191,6 @@ public class EncryptorGui {
         f.add(passwordField);
         f.add(checkBox);
         f.add(labelKey);
-        f.revalidate();
-        f.repaint();
 
         b.addActionListener(new ActionListener() {
             @Override
@@ -204,12 +209,12 @@ public class EncryptorGui {
                 }
             }
         });
+        f.revalidate();
+        f.repaint();
     }
 
     void drawEncryptingScreen() {
         f.getContentPane().removeAll();
-        f.revalidate();
-        f.repaint();
         JLabel labelInProcess = new JLabel("encryption in process");
         labelInProcess.setBounds(250, 150, 300, 30);
         labelInProcess.setBackground(null);
@@ -219,6 +224,8 @@ public class EncryptorGui {
         percentsLabel.setBounds(250, 200, 500, 30);
         percentsLabel.setBackground(null);
         f.add(percentsLabel);
+        f.revalidate();
+        f.repaint();
 
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -228,16 +235,15 @@ public class EncryptorGui {
                 try {
                     inputPair = IOUtils.getFileInputStream(input);
                     outputStream = IOUtils.getFileOutputStream(output);
-                    EncryptorLogic.encrypt(true, inputPair.getKey(), outputStream, inputPair.getValue(), key, 200 * 1024 * 1024, new EncryptorLogic.ProgressUpdateListener() {
+                    EncryptorLogic.encrypt(encrypt, inputPair.getKey(), outputStream, inputPair.getValue(), key, 200 * 1024 * 1024, new EncryptorLogic.ProgressUpdateListener() {
                         @Override
                         public void progressUpdated(int percents) {
                             percentsLabel.setText(EncryptorLogic.percentsFinished + "% finished");
                         }
                     });
                     f.getContentPane().removeAll();
-                    f.revalidate();
-                    f.repaint();
-                    JLabel labelFinish = new JLabel("File was encrypted successfully!");
+
+                    JLabel labelFinish = new JLabel("Process finished successfully!");
                     labelFinish.setBounds(150, 150, 300, 30);
                     labelFinish.setBackground(null);
                     f.add(labelFinish);
@@ -248,15 +254,14 @@ public class EncryptorGui {
                     toStartScreen.addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
-                            f.getContentPane().removeAll();
-                            f.revalidate();
-                            f.repaint();
                             drawStartScreen();
                         }
                     });
                     f.revalidate();
                     f.repaint();
                 } catch (FileNotFoundException | ReadException e) {
+                    f.getContentPane().removeAll();
+                    f.add(percentsLabel);
                     percentsLabel.setText(e.getMessage());
                     JButton b = new JButton("choose another input file");
                     b.setBounds(150, 300, 300, 50);
@@ -270,6 +275,8 @@ public class EncryptorGui {
                     f.revalidate();
                     f.repaint();
                 } catch (WriteException e) {
+                    f.getContentPane().removeAll();
+                    f.add(percentsLabel);
                     percentsLabel.setText(e.getMessage());
                     JButton b = new JButton("choose another directory to save file");
                     b.setBounds(150, 300, 400, 50);
@@ -285,7 +292,6 @@ public class EncryptorGui {
                 }
             }
         });
-
         thread.start();
     }
 }

@@ -20,9 +20,12 @@ public class IOUtils {
 
     public static FileOutputStream getFileOutputStream(String outputPath) throws FileNotFoundException, WriteException {
         File outputFile = new File(outputPath);
-        if(!outputFile.canWrite()) {
+        try {
+            outputFile.createNewFile();
+        } catch (IOException e) {
             throw new WriteException("can't write to this directory");
         }
+
         return new FileOutputStream(outputFile);
     }
 }
