@@ -16,11 +16,15 @@ public class EncryptorGui {
         encryptorGui.makeFrame();
     }
 
+    private EncryptorLogic simpleEncryptorLogic = new SimpleEncryptorLogic();
+    private EncryptorLogic aesEncryptorLogic = new AESEncryptorLogic();
+
     private JFrame f;
     private String input;
     private char[] key;
     private String output;
     private boolean encrypt;
+    static JLabel percentsLabel = new JLabel("0 % finished");
 
     enum FileType {
         INPUT,
@@ -108,7 +112,8 @@ public class EncryptorGui {
         if (fileType == FileType.OUTPUT) {
             if (encrypt == true) {
                 fileChooser.setSelectedFile(new File(input + ".enc"));
-            } else { fileChooser.setSelectedFile(new File(input + ".dec"));
+            } else {
+                fileChooser.setSelectedFile(new File(input + ".dec"));
             }
             result = fileChooser.showSaveDialog(f);
             if (result == JFileChooser.APPROVE_OPTION) {
@@ -220,7 +225,6 @@ public class EncryptorGui {
         labelInProcess.setBackground(null);
         f.add(labelInProcess);
 
-        JLabel percentsLabel = new JLabel("0 % finished");
         percentsLabel.setBounds(250, 200, 500, 30);
         percentsLabel.setBackground(null);
         f.add(percentsLabel);
@@ -230,17 +234,23 @@ public class EncryptorGui {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
+
                 Map.Entry<FileInputStream, Long> inputPair;
                 OutputStream outputStream;
                 try {
                     inputPair = IOUtils.getFileInputStream(input);
                     outputStream = IOUtils.getFileOutputStream(output);
-                    EncryptorLogic.encrypt(encrypt, inputPair.getKey(), outputStream, inputPair.getValue(), key, 200 * 1024 * 1024, new EncryptorLogic.ProgressUpdateListener() {
-                        @Override
-                        public void progressUpdated(int percents) {
-                            percentsLabel.setText(EncryptorLogic.percentsFinished + "% finished");
-                        }
-                    });
+
+//                    simpleEncryptorLogic.encrypt(encrypt, inputPair.getKey(), outputStream, key);
+                    aesEncryptorLogic.encrypt(encrypt, inputPair.getKey(), outputStream, key);
+
+//                    AESEncryptorLogic.aESEncrypt(encrypt, 128, inputPair.getKey(), outputStream, key);
+//                    simpleEncryptorLogic.encrypt(encrypt, inputPair.getKey(), outputStream, inputPair.getValue(), key, 200 * 1024 * 1024, new SimpleEncryptorLogic.ProgressUpdateListener() {
+//                        @Override
+//                        public void progressUpdated(int percents) {
+//                            percentsLabel.setText(SimpleEncryptorLogic.percentsFinished + "% finished");
+//                        }
+//                    });
                     f.getContentPane().removeAll();
 
                     JLabel labelFinish = new JLabel("Process finished successfully!");
