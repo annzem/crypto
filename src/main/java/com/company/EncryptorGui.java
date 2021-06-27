@@ -227,7 +227,7 @@ public class EncryptorGui {
 
         percentsLabel.setBounds(250, 200, 500, 30);
         percentsLabel.setBackground(null);
-        f.add(percentsLabel);
+//        f.add(percentsLabel);
         f.revalidate();
         f.repaint();
 
@@ -241,8 +241,8 @@ public class EncryptorGui {
                     inputPair = IOUtils.getFileInputStream(input);
                     outputStream = IOUtils.getFileOutputStream(output);
 
-//                    simpleEncryptorLogic.encrypt(encrypt, inputPair.getKey(), outputStream, key);
-                    aesEncryptorLogic.encrypt(encrypt, inputPair.getKey(), outputStream, key);
+                    simpleEncryptorLogic.encrypt(encrypt, inputPair.getKey(), outputStream, key);
+//                    aesEncryptorLogic.encrypt(encrypt, inputPair.getKey(), outputStream, key);
 
 //                    AESEncryptorLogic.aESEncrypt(encrypt, 128, inputPair.getKey(), outputStream, key);
 //                    simpleEncryptorLogic.encrypt(encrypt, inputPair.getKey(), outputStream, inputPair.getValue(), key, 200 * 1024 * 1024, new SimpleEncryptorLogic.ProgressUpdateListener() {
@@ -271,8 +271,8 @@ public class EncryptorGui {
                     f.repaint();
                 } catch (FileNotFoundException | ReadException e) {
                     f.getContentPane().removeAll();
-                    f.add(percentsLabel);
-                    percentsLabel.setText(e.getMessage());
+//                    f.add(percentsLabel);
+//                    percentsLabel.setText(e.getMessage());
                     JButton b = new JButton("choose another input file");
                     b.setBounds(150, 300, 300, 50);
                     f.add(b);
@@ -286,8 +286,8 @@ public class EncryptorGui {
                     f.repaint();
                 } catch (WriteException e) {
                     f.getContentPane().removeAll();
-                    f.add(percentsLabel);
-                    percentsLabel.setText(e.getMessage());
+//                    f.add(percentsLabel);
+//                    percentsLabel.setText(e.getMessage());
                     JButton b = new JButton("choose another directory to save file");
                     b.setBounds(150, 300, 400, 50);
                     f.add(b);

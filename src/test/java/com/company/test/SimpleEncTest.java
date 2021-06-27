@@ -1,6 +1,6 @@
 package com.company.test;
 
-import com.company.EncryptorLogic;
+import com.company.SimpleEncryptorLogic;
 import com.company.ReadException;
 import com.company.WriteException;
 import org.junit.jupiter.api.Assertions;
@@ -8,12 +8,14 @@ import org.junit.jupiter.api.Test;
 
 import java.io.*;
 
-public class EncTest {
+public class SimpleEncTest {
     @Test
     void sizesEq() throws IOException, ReadException, WriteException {
+        SimpleEncryptorLogic simpleEncryptorLogic = new SimpleEncryptorLogic();
+        
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-        EncryptorLogic.encrypt(true, new ByteArrayInputStream("qwe".getBytes()), output, 3, new char[]{'a', 's', 'd'}, 3, new EncryptorLogic.ProgressUpdateListener() {
+        simpleEncryptorLogic.simpleEncrypt(true, new ByteArrayInputStream("qwe".getBytes()), output, 3, new char[]{'a', 's', 'd'}, 3, new SimpleEncryptorLogic.ProgressUpdateListener() {
             @Override
             public void progressUpdated(int percents) {
             }
@@ -25,9 +27,10 @@ public class EncTest {
 
     @Test
     void bufSizeNotMultipleOfInp() throws IOException, ReadException, WriteException {
+        SimpleEncryptorLogic encryptorLogic = new SimpleEncryptorLogic();
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-        EncryptorLogic.encrypt(true, new ByteArrayInputStream("qwe".getBytes()), output, 3, new char[]{'a', 's', 'd'}, 2, new EncryptorLogic.ProgressUpdateListener() {
+        encryptorLogic.simpleEncrypt(true, new ByteArrayInputStream("qwe".getBytes()), output, 3, new char[]{'a', 's', 'd'}, 2, new SimpleEncryptorLogic.ProgressUpdateListener() {
             @Override
             public void progressUpdated(int percents) {
             }
@@ -39,9 +42,10 @@ public class EncTest {
 
     @Test
     void bufSizeMultipleOfInp() throws IOException, ReadException, WriteException {
+        SimpleEncryptorLogic encryptorLogic = new SimpleEncryptorLogic();
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-        EncryptorLogic.encrypt(true, new ByteArrayInputStream("qweqwe".getBytes()), output, 6, new char[]{'a', 's', 'd', 'a', 's', 'd'}, 2, new EncryptorLogic.ProgressUpdateListener() {
+        encryptorLogic.simpleEncrypt(true, new ByteArrayInputStream("qweqwe".getBytes()), output, 6, new char[]{'a', 's', 'd', 'a', 's', 'd'}, 2, new SimpleEncryptorLogic.ProgressUpdateListener() {
             @Override
             public void progressUpdated(int percents) {
             }
@@ -53,9 +57,10 @@ public class EncTest {
 
     @Test
     void bufSizeBiggerThanInp() throws IOException, ReadException, WriteException {
+        SimpleEncryptorLogic encryptorLogic = new SimpleEncryptorLogic();
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-        EncryptorLogic.encrypt(true, new ByteArrayInputStream("qwe".getBytes()), output, 3, new char[]{'a', 's', 'd'}, 4, new EncryptorLogic.ProgressUpdateListener() {
+        encryptorLogic.simpleEncrypt(true, new ByteArrayInputStream("qwe".getBytes()), output, 3, new char[]{'a', 's', 'd'}, 4, new SimpleEncryptorLogic.ProgressUpdateListener() {
             @Override
             public void progressUpdated(int percents) {
             }
@@ -67,9 +72,10 @@ public class EncTest {
 
     @Test
     void keyIsSmallerInp() throws IOException, ReadException, WriteException {
+        SimpleEncryptorLogic encryptorLogic = new SimpleEncryptorLogic();
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-        EncryptorLogic.encrypt(true, new ByteArrayInputStream("qwe".getBytes()), output, 3, new char[]{'a', 's'}, 3, new EncryptorLogic.ProgressUpdateListener() {
+        encryptorLogic.simpleEncrypt(true, new ByteArrayInputStream("qwe".getBytes()), output, 3, new char[]{'a', 's'}, 3, new SimpleEncryptorLogic.ProgressUpdateListener() {
             @Override
             public void progressUpdated(int percents) {
             }
@@ -81,9 +87,10 @@ public class EncTest {
 
     @Test
     void keyIsLongerInp() throws IOException, ReadException, WriteException {
+        SimpleEncryptorLogic encryptorLogic = new SimpleEncryptorLogic();
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-        EncryptorLogic.encrypt(true, new ByteArrayInputStream("qwe".getBytes()), output, 3, new char[]{'a', 's', 'd', 'f'}, 3, new EncryptorLogic.ProgressUpdateListener() {
+        encryptorLogic.simpleEncrypt(true, new ByteArrayInputStream("qwe".getBytes()), output, 3, new char[]{'a', 's', 'd', 'f'}, 3, new SimpleEncryptorLogic.ProgressUpdateListener() {
             @Override
             public void progressUpdated(int percents) {
             }
