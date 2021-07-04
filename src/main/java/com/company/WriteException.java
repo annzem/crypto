@@ -8,4 +8,8 @@ public class WriteException extends Exception {
     public WriteException(String message) {
         super(message);
     }
+
+    public WriteException(Throwable cause) {
+        super(cause);
+    }
 }

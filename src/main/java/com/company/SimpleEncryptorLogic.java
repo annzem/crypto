@@ -5,25 +5,20 @@ import java.io.*;
 public class SimpleEncryptorLogic implements EncryptorLogic {
 
     @Override
-    public void encrypt(boolean encrypt, InputStream inputStream, OutputStream outputStream, char[] password) {
+    public void encrypt(boolean encrypt, InputStream inputStream, OutputStream outputStream, char[] password) throws ReadException, WriteException {
         long lengthInputStream = 0;
         try {
             lengthInputStream = inputStream.available();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new ReadException("something wrong with InputStream");
         }
-        try {
-            simpleEncrypt(encrypt, inputStream, outputStream, lengthInputStream, password, 1024, new ProgressUpdateListener() {
-                            @Override
-                            public void progressUpdated(int percents) {
-                                EncryptorGui.percentsLabel.setText(SimpleEncryptorLogic.percentsFinished + "% finished");
-                            }
-                        });
-        } catch (ReadException e) {
-            e.printStackTrace();
-        } catch (WriteException e) {
-            e.printStackTrace();
-        }
+
+        simpleEncrypt(encrypt, inputStream, outputStream, lengthInputStream, password, 1024, new ProgressUpdateListener() {
+            @Override
+            public void progressUpdated(int percents) {
+                EncryptorGui.percentsLabel.setText(SimpleEncryptorLogic.percentsFinished + "% finished");
+            }
+        });
     }
 
     public interface ProgressUpdateListener {
@@ -33,12 +28,12 @@ public class SimpleEncryptorLogic implements EncryptorLogic {
     static int percentsFinished = -1;
 
     public void simpleEncrypt(boolean encrypt,
-                               InputStream fileInputStream,
-                               OutputStream fileOutputStream,
-                               long sourceFileLength,
-                               char[] key,
-                               int bufSize,
-                               ProgressUpdateListener progressUpdateListener) throws ReadException, WriteException {
+                              InputStream fileInputStream,
+                              OutputStream fileOutputStream,
+                              long sourceFileLength,
+                              char[] key,
+                              int bufSize,
+                              ProgressUpdateListener progressUpdateListener) throws ReadException, WriteException {
 
         byte[] buf;
         if (sourceFileLength > bufSize || sourceFileLength == 0) {

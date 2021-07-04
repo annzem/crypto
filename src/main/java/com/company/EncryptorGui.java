@@ -241,8 +241,8 @@ public class EncryptorGui {
                     inputPair = IOUtils.getFileInputStream(input);
                     outputStream = IOUtils.getFileOutputStream(output);
 
-                    simpleEncryptorLogic.encrypt(encrypt, inputPair.getKey(), outputStream, key);
-//                    aesEncryptorLogic.encrypt(encrypt, inputPair.getKey(), outputStream, key);
+//                    simpleEncryptorLogic.encrypt(encrypt, inputPair.getKey(), outputStream, key);
+                    aesEncryptorLogic.encrypt(encrypt, inputPair.getKey(), outputStream, key);
 
 //                    AESEncryptorLogic.aESEncrypt(encrypt, 128, inputPair.getKey(), outputStream, key);
 //                    simpleEncryptorLogic.encrypt(encrypt, inputPair.getKey(), outputStream, inputPair.getValue(), key, 200 * 1024 * 1024, new SimpleEncryptorLogic.ProgressUpdateListener() {
@@ -270,6 +270,7 @@ public class EncryptorGui {
                     f.revalidate();
                     f.repaint();
                 } catch (FileNotFoundException | ReadException e) {
+                    e.printStackTrace();
                     f.getContentPane().removeAll();
 //                    f.add(percentsLabel);
 //                    percentsLabel.setText(e.getMessage());
@@ -285,6 +286,7 @@ public class EncryptorGui {
                     f.revalidate();
                     f.repaint();
                 } catch (WriteException e) {
+                    e.printStackTrace();
                     f.getContentPane().removeAll();
 //                    f.add(percentsLabel);
 //                    percentsLabel.setText(e.getMessage());
@@ -295,6 +297,24 @@ public class EncryptorGui {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             drawChooseFileScreen(FileType.OUTPUT, output, "OUTPUT PATH: ", "choose another directory");
+                        }
+                    });
+                    f.revalidate();
+                    f.repaint();
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    f.getContentPane().removeAll();
+                    JButton b = new JButton("Smth gone wrong. Try again");
+                    JLabel l = new JLabel(e.getMessage());
+                    b.setBounds(150, 150, 300, 50);
+                    l.setBounds(50, 200, 600, 100);
+                    f.add(b);
+                    f.add(l);
+                    b.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            drawStartScreen();
                         }
                     });
                     f.revalidate();
