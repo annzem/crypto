@@ -1,8 +1,13 @@
 package com.company;
 
+import com.encryptor.ReadException;
+import com.encryptor.WriteException;
+import org.springframework.stereotype.Component;
+
 import java.io.*;
 
-public class SimpleEncryptorLogic implements EncryptorLogic {
+@Component
+public class SimpleEncryptorLogic implements com.encryptor.EncryptorLogic {
 
     @Override
     public void encrypt(boolean encrypt, InputStream inputStream, OutputStream outputStream, char[] password) throws ReadException, WriteException {
@@ -13,27 +18,15 @@ public class SimpleEncryptorLogic implements EncryptorLogic {
             throw new ReadException("something wrong with InputStream");
         }
 
-        simpleEncrypt(encrypt, inputStream, outputStream, lengthInputStream, password, 1024, new ProgressUpdateListener() {
-            @Override
-            public void progressUpdated(int percents) {
-                EncryptorGui.percentsLabel.setText(SimpleEncryptorLogic.percentsFinished + "% finished");
-            }
-        });
+        simpleEncrypt(encrypt, inputStream, outputStream, lengthInputStream, password, 1024);
     }
-
-    public interface ProgressUpdateListener {
-        void progressUpdated(int percents);
-    }
-
-    static int percentsFinished = -1;
 
     public void simpleEncrypt(boolean encrypt,
                               InputStream fileInputStream,
                               OutputStream fileOutputStream,
                               long sourceFileLength,
                               char[] key,
-                              int bufSize,
-                              ProgressUpdateListener progressUpdateListener) throws ReadException, WriteException {
+                              int bufSize) throws ReadException, WriteException {
 
         byte[] buf;
         if (sourceFileLength > bufSize || sourceFileLength == 0) {
@@ -68,12 +61,6 @@ public class SimpleEncryptorLogic implements EncryptorLogic {
                 fileOutputStream.write(buf, 0, read);
             } catch (IOException e) {
                 throw new WriteException("Can't write to output", e);
-            }
-
-            int currentPercents = (int) ((long) buf.length * (long) step * 100 / inputFileLength);
-            if (currentPercents != percentsFinished) {
-                percentsFinished = currentPercents;
-                progressUpdateListener.progressUpdated(percentsFinished);
             }
         }
         try {

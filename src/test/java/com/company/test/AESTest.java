@@ -1,6 +1,8 @@
 package com.company.test;
 
 import com.company.AESEncryptorLogic;
+import com.encryptor.ReadException;
+import com.encryptor.WriteException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -8,9 +10,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
-public class AESEncTest {
+public class AESTest {
     @Test
-    void sizesEq() {
+    void sizesEq() throws ReadException, WriteException {
         AESEncryptorLogic aesEncryptorLogic = new AESEncryptorLogic();
 
         ByteArrayOutputStream output = new ByteArrayOutputStream();

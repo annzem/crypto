@@ -1,5 +1,10 @@
 package com.company;
 
+import com.encryptor.EncryptorLogic;
+import com.encryptor.ReadException;
+import com.encryptor.WriteException;
+import org.springframework.stereotype.Component;
+
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
@@ -17,6 +22,7 @@ import java.security.spec.KeySpec;
 import java.util.Arrays;
 import java.util.Random;
 
+@Component
 public class AESEncryptorLogic implements EncryptorLogic {
 
     private static final int ITERATIONS = 32768;
@@ -71,7 +77,6 @@ public class AESEncryptorLogic implements EncryptorLogic {
         if (encrypt) {
             byte[] salt = generateSalt(SALT);
             Keys keys = getKey(keyLength, password, salt);
-            cipher = null;
 
             byte[] iv;
             try {
@@ -99,18 +104,19 @@ public class AESEncryptorLogic implements EncryptorLogic {
                 byte[] authRead = new byte[8];
                 fileInputStream.read(authRead);
                 if (!Arrays.equals(keys.authentication.getEncoded(), authRead)) {
-                    byte[] iv = new byte[16];
-                    fileInputStream.read(iv);
-                    Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-                    cipher.init(Cipher.DECRYPT_MODE, keys.encryption, new IvParameterSpec(iv));
+                    throw new RuntimeException("wrong password");
                 }
+                byte[] iv = new byte[16];
+                fileInputStream.read(iv);
+                cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                cipher.init(Cipher.DECRYPT_MODE, keys.encryption, new IvParameterSpec(iv));
             } catch (NoSuchAlgorithmException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchPaddingException e) {
                 throw new RuntimeException(e);
             } catch (IOException e) {
                 throw new ReadException(e);
             }
-
-            byte[] buf = new byte[BUF_SIZE]; //1024
+        }
+            byte[] buf = new byte[BUF_SIZE];
             int bytesReadNum;
             byte[] encrypted;
             while (true) {
@@ -140,6 +146,5 @@ public class AESEncryptorLogic implements EncryptorLogic {
                     throw new WriteException(e);
                 }
             }
-        }
     }
 }
