@@ -4,10 +4,10 @@ import com.encryptor.EncryptorLogic;
 import com.encryptor.ReadException;
 import com.encryptor.WriteException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.swing.*;
@@ -16,16 +16,24 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.Map;
 
-@SpringBootApplication
+@Component
 public class EncryptorGui extends JFrame {
 
     public EncryptorGui() {
     }
 
     public static void main(String[] args) {
-        ConfigurableApplicationContext context = new SpringApplicationBuilder(EncryptorGui.class).headless(false).run(args);
+        try {
+            Class<?> aClass = Class.forName("com.company.SimpleEncBase64");
+            System.out.println("class found");
+        } catch (ClassNotFoundException e) {
+            System.out.println("class not found");
+        }
+        ConfigurableApplicationContext context = new AnnotationConfigApplicationContext("com.company");//new SpringApplicationBuilder(EncryptorGui.class).headless(false).run(args);
     }
 
     private String input;
@@ -51,7 +59,7 @@ public class EncryptorGui extends JFrame {
         });
     }
 
-    void makeFrame() {
+    private void makeFrame() {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setSize(700, 500);
         setLayout(null);
@@ -59,7 +67,7 @@ public class EncryptorGui extends JFrame {
         drawStartScreen();
     }
 
-    void drawStartScreen() {
+    private void drawStartScreen() {
         getContentPane().removeAll();
         JButton encryptButton = new JButton("encrypt file");
         JButton decryptButton = new JButton("decrypt file");
@@ -99,7 +107,7 @@ public class EncryptorGui extends JFrame {
         repaint();
     }
 
-    void drawButtonChoose(FileType fileType, String button) {
+    private void drawButtonChoose(FileType fileType, String button) {
         if (fileType == null) {
             throw new RuntimeException("fileType is null");
         }
@@ -121,7 +129,7 @@ public class EncryptorGui extends JFrame {
         repaint();
     }
 
-    void drawChooseFileScreen(FileType fileType, String variable, String pathText, String button) {
+    private void drawChooseFileScreen(FileType fileType, String variable, String pathText, String button) {
         if (fileType == null) {
             throw new RuntimeException("fileType is null");
         }
@@ -187,7 +195,7 @@ public class EncryptorGui extends JFrame {
         });
     }
 
-    void drawSetKeyScreen() {
+    private void drawSetKeyScreen() {
         getContentPane().removeAll();
 
         JLabel l = new JLabel("key:");
@@ -248,7 +256,7 @@ public class EncryptorGui extends JFrame {
         repaint();
     }
 
-    void drawEncryptingScreen() {
+    private void drawEncryptingScreen() {
         getContentPane().removeAll();
         JLabel labelInProcess = new JLabel("encryption in process");
         labelInProcess.setBounds(250, 150, 300, 30);
